@@ -4,39 +4,63 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using URandom = UnityEngine.Random;
+using System.Reflection;
 
 public class Utils
 {
-    public static int[] followType = new int[7];
-    public static List<int> saveValuesRamdom = new List<int>();
-    public static int[] valuesRamdom = new int[3] { 3, 6, 9 };
+    public static List<int> nomaltypes = new List<int>();
+    public static int index = 0;
     public static void RamdomFlowXboardAndYboard(int amout)
     {
-        int i = 0;
-        while (amout > 0)
+        if(amout % 7 == 0)//lay du loai ca khi thoa man dk amout chia het cho 7 va so luong cac loai ca trung chia het cho 3
         {
+            int tmp = amout / 7;
+            if(tmp % 3 == 0)
+            {
+                for (int j = 0; j < 7; j++)
+                {
 
-            if (i > followType.Length - 1)
-            {
-                i = 0;
+                    for (int k = 0; k < tmp; k++)
+                    {
+                        nomaltypes.Add(j);
+                    }
+                }
+                index = nomaltypes.Count - 1;
+                MixType(nomaltypes);
+                return;
             }
-            int valueRD = URandom.Range(0, valuesRamdom.Length);
-            if (amout < valuesRamdom[valueRD])
-            {
-                followType[i] += amout;
-                amout = 0;
-            }
-            amout -= valuesRamdom[valueRD];
-            followType[i] += valuesRamdom[valueRD];
-            i++;
         }
-        for (int j = 0; j < followType.Length; j++)
+        for (int i = 7; i > 0; i--)
         {
-            if (followType[j] > 0)
+            if (amout % i == 0)
             {
-                saveValuesRamdom.Add(followType[j]);
-                followType[j] = 0;
+                int tmp = amout / i;
+                if (tmp % 3 == 0)
+                {
+                    int rnd = URandom.Range(i, 8);
+                    for (int j = rnd - i; j < rnd; j++)
+                    {
+
+                        for (int k = 0; k < tmp; k++)
+                        {
+                            nomaltypes.Add(j);
+                        }
+                    }
+                    index = nomaltypes.Count - 1;
+                    MixType(nomaltypes);
+                    break;
+                }
             }
+        }
+    }
+    public static void MixType(List<int> normaltypes)
+    {
+        for (int i = 0; i < normaltypes.Count - 1; i++)
+        {
+            int rnd = URandom.Range(i, normaltypes.Count);
+            int tmp = nomaltypes[i];
+            nomaltypes[i] = nomaltypes[rnd];
+            nomaltypes[rnd] = tmp;
         }
     }
     public static NormalItem.eNormalType GetRandomNormalType()
@@ -49,18 +73,10 @@ public class Utils
 
     public static NormalItem.eNormalType GetRandomNormalTypeExcept(NormalItem.eNormalType[] types)//ramdom
     {
-        List<NormalItem.eNormalType> list = Enum.GetValues(typeof(NormalItem.eNormalType)).Cast<NormalItem.eNormalType>().Except(types).ToList();
-
-
-        int rnd = URandom.Range(0, saveValuesRamdom.Count);
-        saveValuesRamdom[rnd] -= 1;
-        while (saveValuesRamdom[rnd] <= 0)
-        {
-            rnd = URandom.Range(0, saveValuesRamdom.Count);
-        }
-
-            NormalItem.eNormalType result = list[rnd];
-
+        List<NormalItem.eNormalType> list = Enum.GetValues(typeof(NormalItem.eNormalType)).Cast<NormalItem.eNormalType>().ToList();
+        NormalItem.eNormalType result = list[nomaltypes[index]];
+        nomaltypes.RemoveAt(index);
+        index--;
         return result;
     }
 }

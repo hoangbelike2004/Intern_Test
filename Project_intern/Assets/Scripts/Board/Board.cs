@@ -87,6 +87,10 @@ public class Board
         }
 
     }
+    public Cell[,] GetCells()
+    {
+        return m_cells;
+    }
 
     internal void Fill()
     {
@@ -131,6 +135,7 @@ public class Board
 
                 cell.Assign(item);
                 cell.ApplyItemPosition(false);
+                item.SetCellSave(cell);
             }
         }
     }
@@ -194,7 +199,7 @@ public class Board
         }
     }
 
-    public void Swap(Cell cell1, Cell cell2, Action callback)
+    public void Swap(Cell cell1, Cell cell2, bool isReturnPos, Action callback)
     {
         Item item = cell1.Item;
         cell1.Free();
@@ -203,9 +208,21 @@ public class Board
         //cell2.Free();
         //cell2.Assign(item);
         if (item == null) return;
-        SapXep(item, callback);
+        if (isReturnPos)
+        {
+            MoveBackToPos(item, cell2, callback);
+        }
+        else
+        {
+            SapXep(item, callback);
+        }
         //item.View.DOMove(cell2.transform.position, 0.3f);//????
         //item.View.DOMove(cell2.transform.position, 0.3f).OnComplete(() => { if (callback != null) callback(); });
+    }
+    public void MoveBackToPos(Item item, Cell cel2, Action callback)
+    {
+        cel2.Assign(item);
+        item.View.DOMove(cel2.transform.position, 0.5f).OnComplete(() => { if (callback != null) callback(); });
     }
     public void SapXep(Item item, Action callback)
     {
@@ -252,7 +269,6 @@ public class Board
         }
         row_Collected_item[temp].Assign(item);
         item.View.DOMove(row_Collected_item[temp].transform.position, 0.5f).OnComplete(() => { if (callback != null) callback(); });
-        Debug.Log(callback);
     }
 
 

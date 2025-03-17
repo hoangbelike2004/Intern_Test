@@ -8,6 +8,7 @@ using DG.Tweening;
 public class Item
 {
     public Cell Cell { get; private set; }
+    public Cell CellSave { get; private set; }
 
     public Transform View { get; private set; }
 
@@ -33,7 +34,10 @@ public class Item
     {
         Cell = cell;
     }
-
+    public virtual void SetCellSave(Cell cellSave)
+    {
+        CellSave = cellSave;
+    }
     internal void AnimationMoveToPosition()
     {
         if (View == null) return;

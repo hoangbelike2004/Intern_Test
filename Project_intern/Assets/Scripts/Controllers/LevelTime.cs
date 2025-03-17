@@ -29,10 +29,11 @@ public class LevelTime : LevelCondition
         m_time -= Time.deltaTime;
 
         UpdateText();
-
         if (m_time <= -1f)
         {
             OnConditionComplete();
+
+            m_mngr.SetState(GameManager.eStateGame.GAME_OVER);
         }
     }
 

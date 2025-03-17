@@ -74,7 +74,10 @@ public class GameManager : MonoBehaviour
     internal void SetState(eStateGame state)
     {
         State = state;
-
+        if(state == eStateGame.GAME_OVER)
+        {
+            m_boardController.SetIsPlaySpecial(false);
+        }
         if(State == eStateGame.PAUSE)
         {
             DOTween.PauseAll();
@@ -99,6 +102,7 @@ public class GameManager : MonoBehaviour
         {
             m_levelCondition = this.gameObject.AddComponent<LevelTime>();
             m_levelCondition.Setup(m_gameSettings.LevelMoves, m_uiMenu.GetLevelConditionView(), this);
+            m_boardController.SetIsPlaySpecial(true);
         }
 
         m_levelCondition.ConditionCompleteEvent += GameOver;

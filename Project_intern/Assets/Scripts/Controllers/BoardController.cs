@@ -28,21 +28,24 @@ public class BoardController : MonoBehaviour
     private float m_timeAfterFill;
 
     private bool m_hintIsShown;
-
-    private bool m_gameOver;
+    public int indexrndX, indexrndY = 0;
+    public List<Cell> saveCells;
+    public float timedelay = 0.5f;
+    private bool m_gameOver, isAutoWin, isAutoLose, isPlaySpecial;
+    private int numberofitemdel;
 
     public void StartGame(GameManager gameManager, GameSettings gameSettings)
     {
         m_gameManager = gameManager;
 
         m_gameSettings = gameSettings;
+        numberofitemdel = m_gameSettings.BoardSizeX * m_gameSettings.BoardSizeY;
 
         m_gameManager.StateChangedAction += OnGameStateChange;
 
         m_cam = Camera.main;
 
         m_board = new Board(this.transform, gameSettings);
-
         Fill();
     }
 
@@ -74,6 +77,7 @@ public class BoardController : MonoBehaviour
     {
         if (m_gameOver) return;
         if (IsBusy) return;
+        if (isAutoWin || isAutoLose) return;
 
         //if (!m_hintIsShown)
         //{
@@ -99,10 +103,6 @@ public class BoardController : MonoBehaviour
         //{
         //    ResetRayCast();
         //}
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            m_gameManager.SetState(GameManager.eStateGame.GAME_WIN);
-        }
         if (Input.GetMouseButtonDown(0))
         {
             var hit = Physics2D.Raycast(m_cam.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
@@ -110,33 +110,217 @@ public class BoardController : MonoBehaviour
             {
                 m_hitCollider = hit.collider;
                 Cell c1 = m_hitCollider.GetComponent<Cell>();
-                Cell c2 = null;
                 List<Cell> cells = m_board.GetRowCollectedItem();
-                for (int i = 0; i < cells.Count; i++)
+                if (c1.Item.Cell.transform.position != c1.Item.CellSave.transform.position && isPlaySpecial)
                 {
-                    if (cells[i].Item == null)
+                    Cell cell2 = c1.Item.CellSave;
+  
+                    IsBusy = true;
+                    m_board.Swap(c1, cell2,true, () =>
                     {
-                        c2 = cells[i];
+                        AfterMatches();
+                    });
+                    return;
+                }
+                else
+                {
+                    Cell c2 = null;
+                    for (int i = 0; i < cells.Count; i++)
+                    {
+                        if (cells[i].Item == null)
+                        {
+                            c2 = cells[i];
+                            break;
+                        }
+                    }
+                    IsBusy = true;
+                    m_board.Swap(c1, c2,false, () =>
+                    {
+                        AfterMatches();
+                    });
+                }
+
+            }
+
+        }
+    }
+    public void StartCoroutineAutoWin()
+    {
+        if (!isAutoLose)
+        {
+            isAutoWin = true;
+            StartCoroutine(AutomaticallyWin());
+        }
+    }
+    public IEnumerator AutomaticallyWin()
+    {
+        saveCells = new List<Cell>();
+        int tmp = 0;
+        Cell cell = null;
+        Item itemtmp = null;
+        for (int i = 0; i < m_board.GetCells().GetLength(0); i++)
+        {
+            for (int j = 0; j < m_board.GetCells().GetLength(1); j++)
+            {
+                saveCells.Add(m_board.GetCells()[i, j]);
+            }
+        }
+        while (true)
+        {
+            if (cell == null)
+            {
+                int index = UnityEngine.Random.Range(0, saveCells.Count);
+                cell = saveCells[index];
+                itemtmp = cell.Item;
+                saveCells.RemoveAt(index);
+                MoveItemToCell(cell);
+                tmp++;
+            }
+            else
+            {
+                int index = UnityEngine.Random.Range(0, saveCells.Count);
+                for (int j = index; j < saveCells.Count; j++)
+                {
+                    if (itemtmp.nameItem == saveCells[j].Item.nameItem)
+                    {
+                        cell = saveCells[j];
+                        saveCells.RemoveAt(j);
                         break;
                     }
                 }
-                //if (AreItemsNeighbor(c1, c2))
-                //{
-                IsBusy = true;
-                //SetSortingLayer(c1, c2);
-                m_board.Swap(c1, c2, () =>
+                if (cell.Item == null)//neu cell bang null thi tim phan con lai
                 {
-                    AfterMatches();
-                    //FindMatchesAndCollapse(c1, c2);
-                });
-                //}
+                    for (int j = index - 1; j >= 0; j--)
+                    {
+                        if (itemtmp.nameItem == saveCells[j].Item.nameItem)
+                        {
+                            cell = saveCells[j];
+                            saveCells.RemoveAt(j);
+                            break;
+                        }
+                    }
+                }
+                MoveItemToCell(cell);
+                tmp++;
+                if (tmp == 3)
+                {
+                    itemtmp = null;
+                    cell = null;
+                    tmp = 0;
+                }
 
             }
+            yield return new WaitForSeconds(timedelay);
         }
+    }
+    public void StartCoroutineAutoLose()
+    {
+        if (!isAutoWin)
+        {
+            isAutoLose = true;
+            StartCoroutine(AutomaticallyLose());
+        }
+    }
+    public IEnumerator AutomaticallyLose()
+    {
+        int numberMatches = UnityEngine.Random.Range(0, 2);
+        saveCells = new List<Cell>();
+        int tmp = 0;
+        Cell cell = null;
+        Item itemtmp = null;
+        for (int i = 0; i < m_board.GetCells().GetLength(0); i++)
+        {
+            for (int j = 0; j < m_board.GetCells().GetLength(1); j++)
+            {
+                saveCells.Add(m_board.GetCells()[i, j]);
+            }
+        }
+        while (true)
+        {
+            if (numberMatches > 0)
+            {
+                if (cell == null)
+                {
+                    int index = UnityEngine.Random.Range(0, saveCells.Count);
+                    cell = saveCells[index];
+                    itemtmp = cell.Item;
+                    saveCells.RemoveAt(index);
+                    MoveItemToCell(cell);
+                    tmp++;
+                }
+                else
+                {
+                    int index = UnityEngine.Random.Range(0, saveCells.Count);
+                    for (int j = index; j < saveCells.Count; j++)
+                    {
+                        if (itemtmp.nameItem == saveCells[j].Item.nameItem)
+                        {
+                            cell = saveCells[j];
+                            saveCells.RemoveAt(j);
+                            break;
+                        }
+                    }
+                    if (cell.Item == null)//neu cell bang null thi tim phan con lai
+                    {
+                        for (int j = index - 1; j >= 0; j--)
+                        {
+                            if (itemtmp.nameItem == saveCells[j].Item.nameItem)
+                            {
+                                cell = saveCells[j];
+                                saveCells.RemoveAt(j);
+                                break;
+                            }
+                        }
+                    }
+                    MoveItemToCell(cell);
+                    tmp++;
+                    if (tmp == 3)
+                    {
+                        itemtmp = null;
+                        cell = null;
+                        tmp = 0;
+                        numberMatches--;
+                    }
+
+                }
+            }
+            else
+            {
+                int index = UnityEngine.Random.Range(0, saveCells.Count);
+                cell = saveCells[index];
+                itemtmp = cell.Item;
+                saveCells.RemoveAt(index);
+                MoveItemToCell(cell);
+            }
+            yield return new WaitForSeconds(timedelay);
+        }
+    }
+    public void MoveItemToCell(Cell cel)
+    {
+        Cell c1 = cel;
+        Cell c2 = null;
+        List<Cell> cells = m_board.GetRowCollectedItem();
+        for (int i = 0; i < cells.Count; i++)
+        {
+            if (cells[i].Item == null)
+            {
+                c2 = cells[i];
+                break;
+            }
+        }
+        //if (AreItemsNeighbor(c1, c2))
+        //{
+        IsBusy = true;
+        //SetSortingLayer(c1, c2);
+        m_board.Swap(c1, c2,false, () =>
+        {
+            AfterMatches();
+            //FindMatchesAndCollapse(c1, c2);
+        });
+        //}
     }
     public void AfterMatches()
     {
-
         IsBusy = false;
         int tmp = 0;
         List<Cell> cells = new List<Cell>();
@@ -153,6 +337,14 @@ public class BoardController : MonoBehaviour
                     for (int j = 0; j < cells.Count; j++)
                     {
                         cells[j].ExplodeItem();
+                        numberofitemdel--;
+                        if (numberofitemdel == 0)
+                        {
+                            m_gameManager.SetState(GameManager.eStateGame.GAME_WIN);
+                            isPlaySpecial = false;
+                            isAutoWin = false;
+                            StopAllCoroutines();
+                        }
                     }
                     tmp = 0;
                     cells.Clear();
@@ -181,9 +373,14 @@ public class BoardController : MonoBehaviour
                 tmp = 0;
                 cells.Clear();
             }
-            if (i == row_Collected_item.Count - 2&& row_Collected_item[row_Collected_item.Count-1].Item != null)
+            if (i == row_Collected_item.Count - 2 && row_Collected_item[row_Collected_item.Count - 1].Item != null)
             {
-                m_gameManager.SetState(GameManager.eStateGame.GAME_OVER);
+                isAutoLose = false;
+                if (!isPlaySpecial)
+                {
+                    m_gameManager.SetState(GameManager.eStateGame.GAME_OVER);
+                }
+                StopAllCoroutines();
             }
         }
 
@@ -192,6 +389,10 @@ public class BoardController : MonoBehaviour
     {
         m_isDragging = false;
         m_hitCollider = null;
+    }
+    internal void SetIsPlaySpecial(bool isPlaySpecial)
+    {
+        this.isPlaySpecial = isPlaySpecial;
     }
 
     private void FindMatchesAndCollapse(Cell cell1, Cell cell2)
@@ -291,7 +492,7 @@ public class BoardController : MonoBehaviour
 
     private IEnumerator ShiftDownItemsCoroutine()//
     {
-       //m_board.ShiftDownItems();
+        //m_board.ShiftDownItems();
 
         yield return new WaitForSeconds(0.2f);
 
@@ -359,5 +560,15 @@ public class BoardController : MonoBehaviour
         }
 
         m_potentialMatch.Clear();
+    }
+    private void OnEnable()
+    {
+        UIPanelGame.eventAutoWin += StartCoroutineAutoWin;
+        UIPanelGame.eventAutoLose += StartCoroutineAutoLose;
+    }
+    private void OnDisable()
+    {
+        UIPanelGame.eventAutoWin -= StartCoroutineAutoWin;
+        UIPanelGame.eventAutoLose -= StartCoroutineAutoLose;
     }
 }
