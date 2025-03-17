@@ -1,0 +1,7 @@
+E:\C#\TaskOne\TaskOne\bin\Debug\TaskOne.exe.config
+E:\C#\TaskOne\TaskOne\bin\Debug\TaskOne.exe
+E:\C#\TaskOne\TaskOne\bin\Debug\TaskOne.pdb
+E:\C#\TaskOne\TaskOne\obj\Debug\TaskOne.csproj.AssemblyReference.cache
+E:\C#\TaskOne\TaskOne\obj\Debug\TaskOne.csproj.CoreCompileInputs.cache
+E:\C#\TaskOne\TaskOne\obj\Debug\TaskOne.exe
+E:\C#\TaskOne\TaskOne\obj\Debug\TaskOne.pdb

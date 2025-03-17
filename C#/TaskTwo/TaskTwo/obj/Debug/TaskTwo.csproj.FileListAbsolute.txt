@@ -1,0 +1,7 @@
+E:\C#\TaskTwo\TaskTwo\obj\Debug\TaskTwo.csproj.AssemblyReference.cache
+E:\C#\TaskTwo\TaskTwo\obj\Debug\TaskTwo.csproj.CoreCompileInputs.cache
+E:\C#\TaskTwo\TaskTwo\bin\Debug\TaskTwo.exe.config
+E:\C#\TaskTwo\TaskTwo\bin\Debug\TaskTwo.exe
+E:\C#\TaskTwo\TaskTwo\bin\Debug\TaskTwo.pdb
+E:\C#\TaskTwo\TaskTwo\obj\Debug\TaskTwo.exe
+E:\C#\TaskTwo\TaskTwo\obj\Debug\TaskTwo.pdb

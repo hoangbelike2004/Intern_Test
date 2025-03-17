@@ -1,0 +1,7 @@
+E:\C#\TaskThree\TaskThree\obj\Debug\TaskThree.csproj.AssemblyReference.cache
+E:\C#\TaskThree\TaskThree\obj\Debug\TaskThree.csproj.CoreCompileInputs.cache
+E:\C#\TaskThree\TaskThree\bin\Debug\TaskThree.exe.config
+E:\C#\TaskThree\TaskThree\bin\Debug\TaskThree.exe
+E:\C#\TaskThree\TaskThree\bin\Debug\TaskThree.pdb
+E:\C#\TaskThree\TaskThree\obj\Debug\TaskThree.exe
+E:\C#\TaskThree\TaskThree\obj\Debug\TaskThree.pdb
